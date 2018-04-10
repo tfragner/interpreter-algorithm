@@ -172,7 +172,7 @@ public abstract class Card {
     /**
      * Calculate the max cosine similarity based on two cards. The dimension of the first card is used as a reference dimension.
      * @param subject subject as base for calculation
-     * @param sourceTask task to determine the cosine similarity
+     * @param sourceTask task to determine the^  cosine similarity
      * @return max cosine similarity
      */
     public static double getMaxCosineSimilarity(Card subject, Card sourceTask) {

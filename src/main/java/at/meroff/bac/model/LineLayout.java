@@ -31,7 +31,7 @@ public class LineLayout extends Layout {
 
         reassignTasksToEmptySubjects();
 
-        boolean cont = false;
+        boolean cont;
 
         do { cont = refineAssinements();} while (cont);
 
@@ -43,8 +43,7 @@ public class LineLayout extends Layout {
 
         AtomicBoolean ret = new AtomicBoolean(false);
 
-        subjects.stream()
-                .forEach(subject -> {
+        subjects.forEach(subject -> {
                     List<Task> task = relations.stream()
                             .filter(subjectListPair -> subjectListPair.getKey().equals(subject))
                             .flatMap(subjectListPair -> subjectListPair.getValue().stream())
@@ -58,9 +57,9 @@ public class LineLayout extends Layout {
                         Subject currentSubject = relations
                                 .stream()
                                 .filter(subjectListPair -> subjectListPair.getValue().contains(contested))
-                                .map(subjectListPair -> subjectListPair.getKey())
+                                .map(Pair::getKey)
                                 .findFirst()
-                                .get();
+                                .orElseThrow(() -> new IllegalStateException("Kein Subjekt gefunden"));
 
                         // current number of assigned tasks
                         List<Task> currentSubjectTasks = relations.stream()
@@ -68,23 +67,19 @@ public class LineLayout extends Layout {
                                 .flatMap(o -> o.getValue().stream())
                                 .collect(Collectors.toList());
 
-                        if (currentSubjectTasks.size() == 1) {
-                            // nichts machen weil der Task der einzige für das aktuelle Subjekt ist
-                        } else if (currentSubjectTasks.indexOf(contested) == currentSubjectTasks.size()-1) {
-                            double distCurrent = Card.getDistance(currentSubject, contested);
-                            double distContender = Card.getDistance(subject, contested);
+                        if (currentSubjectTasks.size() != 1) {
+                            if (currentSubjectTasks.indexOf(contested) == currentSubjectTasks.size()-1) {
+                                double distCurrent = Card.getDistance(currentSubject, contested);
+                                double distContender = Card.getDistance(subject, contested);
 
-                            if (distCurrent < distContender) {
+                                if (distCurrent >= distContender) {
+                                    this.relations.stream()
+                                            .filter(subjectListPair -> subjectListPair.getValue().contains(contested))
+                                            .forEach(subjectListPair -> subjectListPair.getValue().remove(contested));
 
-                            } else {
-                                this.relations.stream()
-                                        .filter(subjectListPair -> subjectListPair.getValue().contains(contested))
-                                        .forEach(subjectListPair -> {
-                                            subjectListPair.getValue().remove(contested);
-                                        });
-
-                                addRelation(new Pair<>(subject, contested));
-                                ret.set(true);
+                                    addRelation(new Pair<>(subject, contested));
+                                    ret.set(true);
+                                }
                             }
                         }
 
@@ -130,9 +125,7 @@ public class LineLayout extends Layout {
 
             this.relations.stream()
                     .filter(subjectListPair -> subjectListPair.getValue().contains(nearestTask))
-                    .forEach(subjectListPair -> {
-                        subjectListPair.getValue().remove(nearestTask);
-                    });
+                    .forEach(subjectListPair -> subjectListPair.getValue().remove(nearestTask));
 
             addRelation(new Pair<>(unusedSubject, nearestTask));
         }

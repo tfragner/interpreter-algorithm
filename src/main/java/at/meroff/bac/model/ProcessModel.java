@@ -51,19 +51,20 @@ public class ProcessModel {
         // Create the star layout for the given cards
         StarLayout starLayout = new StarLayout(subjects, tasks, exchanges);
 
+        // Set the Layout according to the previous result
         if (starLayout.checkLayoutPossibility()) {
             this.layout = starLayout;
         } else {
             this.layout = new LineLayout(subjects, tasks, exchanges);
         }
 
+        // Assign tasks to subjects and subjects to tasks
         this.layout.relations.stream()
                 .forEach(subjectSetPair -> {
                     subjectSetPair.getKey().addTasks(subjectSetPair.getValue());
                     subjectSetPair.getValue().stream()
                             .forEach(task -> task.setSubject(subjectSetPair.getKey()));
                 } );
-
     }
 
     public Layout getLayout() {
