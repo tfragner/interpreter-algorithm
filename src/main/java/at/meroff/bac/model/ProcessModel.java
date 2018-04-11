@@ -58,13 +58,7 @@ public class ProcessModel {
             this.layout = new LineLayout(subjects, tasks, exchanges);
         }
 
-        // Assign tasks to subjects and subjects to tasks
-        this.layout.relations.stream()
-                .forEach(subjectSetPair -> {
-                    subjectSetPair.getKey().addTasks(subjectSetPair.getValue());
-                    subjectSetPair.getValue().stream()
-                            .forEach(task -> task.setSubject(subjectSetPair.getKey()));
-                } );
+        this.layout.assignSubjectsAndTasks();
     }
 
     public Layout getLayout() {

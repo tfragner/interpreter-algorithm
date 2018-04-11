@@ -44,16 +44,22 @@ public class LineLayout extends Layout {
         AtomicBoolean ret = new AtomicBoolean(false);
 
         subjects.forEach(subject -> {
+                    // find all tasks assigned to the subject
                     List<Task> task = relations.stream()
                             .filter(subjectListPair -> subjectListPair.getKey().equals(subject))
                             .flatMap(subjectListPair -> subjectListPair.getValue().stream())
                             .collect(Collectors.toList());
+                    // search for the last task
                     Pair<Subject, Task> closestSubjectTask = new Pair<>(subject, task.get(task.size()-1));
 
+                    // search for follow ups for the last task and consider all other tasks
                     Optional<Task> followUp = getFollowUp(closestSubjectTask, false);
 
                     if (followUp.isPresent()) {
+                        // the possible follow up is contested
                         Task contested = followUp.get();
+
+                        // search for the currently assigned subject for the contested task
                         Subject currentSubject = relations
                                 .stream()
                                 .filter(subjectListPair -> subjectListPair.getValue().contains(contested))
@@ -61,7 +67,7 @@ public class LineLayout extends Layout {
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalStateException("Kein Subjekt gefunden"));
 
-                        // current number of assigned tasks
+                        // search for all Tasks assigned to the current subject of the contested task
                         List<Task> currentSubjectTasks = relations.stream()
                                 .filter(subjectListPair -> subjectListPair.getKey().equals(currentSubject))
                                 .flatMap(o -> o.getValue().stream())
@@ -73,10 +79,12 @@ public class LineLayout extends Layout {
                                 double distContender = Card.getDistance(subject, contested);
 
                                 if (distCurrent >= distContender) {
+                                    // remove the current relation for the contested task
                                     this.relations.stream()
                                             .filter(subjectListPair -> subjectListPair.getValue().contains(contested))
                                             .forEach(subjectListPair -> subjectListPair.getValue().remove(contested));
 
+                                    // add a new relation for the contested task
                                     addRelation(new Pair<>(subject, contested));
                                     ret.set(true);
                                 }
@@ -97,7 +105,7 @@ public class LineLayout extends Layout {
             Pair<Subject, Task> closestSubjectTask = getClosestSubjectTaskPair(true);
 
             while (closestSubjectTask != null) {
-                // follow-up tasks are all task not used
+                // follow-up tasks are all task which are not assigned to a subject
                 // in the next step this tasks are getting filtered
                 Optional<Task> follow = getFollowUp(closestSubjectTask, true);
 

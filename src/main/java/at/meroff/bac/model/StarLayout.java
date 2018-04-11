@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class StarLayout extends Layout {
 
+    public final static double THRESHOLD = 0.3;
+
     public StarLayout(Set<Subject> subjects, Set<Task> tasks, Set<Exchange> exchanges) {
         super(subjects, tasks, exchanges);
         this.layoutType = LayoutType.STAR;
@@ -39,7 +41,7 @@ public class StarLayout extends Layout {
                 .average()
                 .orElse(0.0);
 
-        return v < 0.3;
+        return v < THRESHOLD;
     }
 
     private Set<Pair<Subject, List<Task>>> createRelations(Set<Pair<Task, Subject>> nearestTaskSubjectCombinations) {

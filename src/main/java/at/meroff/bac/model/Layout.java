@@ -62,4 +62,14 @@ public abstract class Layout {
 
         return ret.toString();
     }
+
+    public void assignSubjectsAndTasks() {
+        // Assign tasks to subjects and subjects to tasks
+        this.relations.stream()
+                .forEach(subjectSetPair -> {
+                    subjectSetPair.getKey().addTasks(subjectSetPair.getValue());
+                    subjectSetPair.getValue().stream()
+                            .forEach(task -> task.setSubject(subjectSetPair.getKey()));
+                } );
+    }
 }
